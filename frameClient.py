@@ -24,7 +24,7 @@ def check_mmap_file_exists(file_path):
     """Check if the memory-mapped file exists and return a boolean."""
     return os.path.exists(file_path)
 
-def main(callbackFunc=None, showOriginalFrame=False):
+def main(callbackFunc=None, windowName="Shared Frame (press q to exit)", showOriginalFrame=False):
     frame_height, frame_width = FRAME_HEIGHT, FRAME_WIDTH
     frame_size = frame_height * frame_width * FRAME_SIZE_MULTIPLIER
     mmap_file_path = f"{FRAME_MMAP_FILE_NAME}"
@@ -44,13 +44,13 @@ def main(callbackFunc=None, showOriginalFrame=False):
                 frame_data = mm.read(frame_size)
                 release_lock()
 
-                frame = np.frombuffer(frame_data, dtype=np.uint8).reshape((frame_height, frame_width, FRAME_SIZE_MULTIPLIER))
+                frame = np.frombuffer(frame_data, dtype=np.uint8).copy().reshape((FRAME_HEIGHT, FRAME_WIDTH, FRAME_SIZE_MULTIPLIER))
 
                 if callbackFunc:
                     callbackFunc(frame)
 
                 if showOriginalFrame:
-                    cv2.imshow('Shared Frame (press q to exit)', frame)
+                    cv2.imshow(windowName, frame)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
     except KeyboardInterrupt:
