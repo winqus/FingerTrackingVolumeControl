@@ -23,6 +23,8 @@ minVolume, maxVolume = volumeRange[0:2]
 prevTime = 0
 volumeBar = 400
 
+lastFingerEventTime = time.time()
+
 handDetector = handTrackingModule.HandDetector(min_detection_confidence=0.7, max_num_hands=1)
 
 def boundingBoxArea(boundingBox) :
@@ -30,14 +32,13 @@ def boundingBoxArea(boundingBox) :
 
 def process_frame(img, draw=True):
     global prevTime, volumeBar, handDetector, minVolume, maxVolume, volumeInterface
+    global lastFingerEventTime
 
     handDetector.detectHands(img)
     landmarkList, handBoundingBox, palmBoundingBox = handDetector.findPositions(img, handNumber=0)
 
     if landmarkList:
-        # Filter based on palmArea
         palmArea = boundingBoxArea(palmBoundingBox) // 100
-        cv2.putText(img, f'palmArea({palmArea})', (30, 60), cv2.FONT_HERSHEY_COMPLEX, 1.5, (0, 0, 255), 2)
 
         if 20 < palmArea < 1000:
             # Find distance
@@ -56,15 +57,17 @@ def process_frame(img, draw=True):
 
             # Enable volume setting based on fingers up
             fingersUpState = handDetector.fingersUp()
-            if fingersUpState[2] == 0 and fingersUpState[3] == 0 and fingersUpState[4] == 1:
-                volumeInterface.SetMasterVolumeLevelScalar(volumePercentage / 100, None)
+            fingerStateCorrect = (fingersUpState[2] == 0 and fingersUpState[3] == 0 and fingersUpState[4] == 1)
+            if fingerStateCorrect:
+                currentTime = time.time()
+                if (currentTime - lastFingerEventTime) > 0.2:
+                    volumeInterface.SetMasterVolumeLevelScalar(volumePercentage / 100, None)
+                    lastFingerEventTime = currentTime
                 if draw:
                     cv2.circle(img, (midX, midY), 10, (0, 255, 0), cv2.FILLED)
 
     # Drawings
     if draw:
-        # cv2.rectangle(img, (50, 150), (85, 400), (255, 0, 0), 3)
-        # cv2.rectangle(img, (50, int(volumeBar)), (85, 400), (255, 0, 0), cv2.FILLED)
         cv2.rectangle(img, (5, 150), (20, 400), (255, 0, 0), 3)
         cv2.rectangle(img, (5, int(volumeBar)), (20, 400), (255, 0, 0), cv2.FILLED)
         currentVolume = int(volumeInterface.GetMasterVolumeLevelScalar() * 100)
