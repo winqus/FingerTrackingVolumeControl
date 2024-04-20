@@ -5,8 +5,8 @@ import numpy as np
 import os
 
 VIDEO_CAPTURE_DEVICE_ID = 0
-FRAME_HEIGHT = 480
-FRAME_WIDTH = 640
+FRAME_HEIGHT = 720
+FRAME_WIDTH = 1280
 FRAME_SIZE_MULTIPLIER = 3
 FRAME_LOCK_FILE_NAME = "frame.lock"
 FRAME_MMAP_FILE_NAME = "frame.mmap"
@@ -31,6 +31,8 @@ def release_lock():
 def main():
     print("Initializing VideoCapture...")
     cap = cv2.VideoCapture(VIDEO_CAPTURE_DEVICE_ID)
+    cap.set(3, FRAME_WIDTH)
+    cap.set(4, FRAME_HEIGHT)
     # Define the frame dimensions and the size for the memory map
     frame_height, frame_width = FRAME_HEIGHT, FRAME_WIDTH
     frame_size = frame_height * frame_width * FRAME_SIZE_MULTIPLIER
