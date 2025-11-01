@@ -20,6 +20,8 @@ import audio
 
 prevTime = 0
 volumeBar = 400
+cached_volume = 0
+last_volume_check = 0
 
 lastFingerEventTime = time.time()
 
@@ -31,7 +33,9 @@ def boundingBoxArea(boundingBox) :
 def process_frame(img, draw=True):
     global prevTime, volumeBar, handDetector
     global lastFingerEventTime
+    global cached_volume, last_volume_check
     isAdjustingVolume = False
+
 
     handDetector.detectHands(img)
     landmarkList, handBoundingBox, palmBoundingBox = handDetector.findPositions(img, handNumber=0)
@@ -59,11 +63,13 @@ def process_frame(img, draw=True):
             fingerStateCorrect = (fingersUpState[2] == 0 and fingersUpState[3] == 0 and fingersUpState[4] == 1)
             if fingerStateCorrect:
                 currentTime = time.time()
+                isAdjustingVolume = True
                 if (currentTime - lastFingerEventTime) > 0.2:
                     # set system volume (percent 0-100)
                     try:
-                        isAdjustingVolume = True
-                        audio.set_volume(volumePercentage)
+                        if abs(volumePercentage - cached_volume) > 1:
+                            audio.set_volume(volumePercentage)
+                            cached_volume = volumePercentage
                     except Exception:
                         # on failure, ignore so UI still runs
                         logger.debug("Failed to set volume", exc_info=True)
@@ -85,10 +91,14 @@ def process_frame(img, draw=True):
         cv2.rectangle(img, (150 + dx, 5 + dy), (x_fill, 20 + dy), barFillColor, cv2.FILLED)
         cv2.rectangle(img, (150 + dx, 5 + dy), (400 + dx, 20 + dy), colors.COLOR_LINE, 3)
 
-        try:
-            currentVolume = int(audio.get_volume())
-        except Exception:
-            currentVolume = 0
+        currentTime = time.time()
+        if currentTime - last_volume_check > 0.5:
+            try:
+                cached_volume = int(audio.get_volume())
+            except Exception:
+                pass
+            last_volume_check = currentTime
+        currentVolume = cached_volume
 
         adjustingAudioTextColor = colors.COLOR_GREEN if isAdjustingVolume else colors.COLOR_WHITE
         adjustingAudioText = f'Changing audio' if isAdjustingVolume else 'Not changing audio'
@@ -99,10 +109,10 @@ def process_frame(img, draw=True):
     currentTime = time.time()
     fps = 1 / (currentTime - prevTime)
     prevTime = currentTime
-    cv2.putText(img, f'{str(int(fps))}FPS', (5, 20), cv2.FONT_HERSHEY_PLAIN, 1, colors.COLOR_GREEN, 2)
+    # cv2.putText(img, f'{str(int(fps))}FPS', (5, 20), cv2.FONT_HERSHEY_PLAIN, 1, colors.COLOR_GREEN, 2)
 
     # Render
-    cv2.imshow("Image (press q to exit)", img)
+    cv2.imshow("Detector (press q to exit)", img)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         raise KeyboardInterrupt # Exits
 

@@ -60,13 +60,14 @@ class HandDetector():
             handBoundingBox = min(xHandList), min(yHandList), max(xHandList), max(yHandList)
             palmBoundingBox = min(xPalmList), min(yPalmList), max(xPalmList), max(yPalmList)
 
-        if draw:
-            if handBoundingBox:
-                cv2.rectangle(img, (handBoundingBox[0], handBoundingBox[1]), (handBoundingBox[2], handBoundingBox[3]),
-                              colors.COLOR_BBOX_HAND, 2)
-            if palmBoundingBox:
-                cv2.rectangle(img, (palmBoundingBox[0], palmBoundingBox[1]), (palmBoundingBox[2], palmBoundingBox[3]),
-                             colors.COLOR_BBOX_PALM, 2)
+        ### Draw bounding boxes
+        # if draw:
+        #     if handBoundingBox:
+        #         cv2.rectangle(img, (handBoundingBox[0], handBoundingBox[1]), (handBoundingBox[2], handBoundingBox[3]),
+        #                       colors.COLOR_BBOX_HAND, 2)
+        #     if palmBoundingBox:
+        #         cv2.rectangle(img, (palmBoundingBox[0], palmBoundingBox[1]), (palmBoundingBox[2], palmBoundingBox[3]),
+        #                      colors.COLOR_BBOX_PALM, 2)
 
         return self.landmarkList, handBoundingBox, palmBoundingBox
 
