@@ -5,6 +5,7 @@ logger = logging.getLogger(__name__)
 # Configure basic logging so errors are visible when running as a script.
 logging.basicConfig(level=logging.INFO)
 import cv2
+import overlay_colors as colors
 import time
 import handTrackingModule
 import numpy as np
@@ -30,6 +31,7 @@ def boundingBoxArea(boundingBox) :
 def process_frame(img, draw=True):
     global prevTime, volumeBar, handDetector
     global lastFingerEventTime
+    isAdjustingVolume = False
 
     handDetector.detectHands(img)
     landmarkList, handBoundingBox, palmBoundingBox = handDetector.findPositions(img, handNumber=0)
@@ -60,30 +62,44 @@ def process_frame(img, draw=True):
                 if (currentTime - lastFingerEventTime) > 0.2:
                     # set system volume (percent 0-100)
                     try:
+                        isAdjustingVolume = True
                         audio.set_volume(volumePercentage)
                     except Exception:
                         # on failure, ignore so UI still runs
                         logger.debug("Failed to set volume", exc_info=True)
                         pass
                     lastFingerEventTime = currentTime
-                if draw:
-                    cv2.circle(img, (midX, midY), 10, (0, 255, 0), cv2.FILLED)
+            else:
+                isAdjustingVolume = False
+            if draw:
+                circleColor = colors.COLOR_GREEN if isAdjustingVolume else colors.COLOR_LINE
+                cv2.circle(img, (midX, midY), 10, circleColor, cv2.FILLED)
 
     # Drawings
     if draw:
-        cv2.rectangle(img, (5, 150), (20, 400), (255, 0, 0), 3)
-        cv2.rectangle(img, (5, int(volumeBar)), (20, 400), (255, 0, 0), cv2.FILLED)
+        # Finger distance bar
+        dx, dy = -140, 75
+        x_fill = 150 + (400 - int(volumeBar)) + dx
+        x_fill = max(150 + dx, min(400 + dx, x_fill))
+        barFillColor = colors.COLOR_GREEN if isAdjustingVolume else colors.COLOR_LINE
+        cv2.rectangle(img, (150 + dx, 5 + dy), (x_fill, 20 + dy), barFillColor, cv2.FILLED)
+        cv2.rectangle(img, (150 + dx, 5 + dy), (400 + dx, 20 + dy), colors.COLOR_LINE, 3)
+
         try:
             currentVolume = int(audio.get_volume())
         except Exception:
             currentVolume = 0
-        cv2.putText(img, f'Volume({currentVolume}%)', (80, 30), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
+
+        adjustingAudioTextColor = colors.COLOR_GREEN if isAdjustingVolume else colors.COLOR_WHITE
+        adjustingAudioText = f'Changing audio' if isAdjustingVolume else 'Not changing audio'
+        cv2.putText(img, adjustingAudioText, (5, 70), cv2.FONT_HERSHEY_PLAIN, 1, adjustingAudioTextColor, 2)
+        cv2.putText(img, f'AUDIO={currentVolume}%', (0, 45), cv2.FONT_HERSHEY_PLAIN, 2, colors.COLOR_GREEN, 2)
 
     # Frame rate
     currentTime = time.time()
     fps = 1 / (currentTime - prevTime)
     prevTime = currentTime
-    cv2.putText(img, str(int(fps)), (5, 30), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 1, (0, 255, 0), 2)
+    cv2.putText(img, f'{str(int(fps))}FPS', (5, 20), cv2.FONT_HERSHEY_PLAIN, 1, colors.COLOR_GREEN, 2)
 
     # Render
     cv2.imshow("Image (press q to exit)", img)

@@ -3,6 +3,7 @@ import time
 import handTrackingModule
 import numpy as np
 import math
+import overlay_colors as colors
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 
@@ -37,14 +38,14 @@ def main():
             midX, midY = (x1 + x2) // 2, (y1 + y2) // 2
             length = math.hypot(x2 - x1, y2 - y1)
 
-            cv2.putText(img, f'x1={x1}, y1={y1}', (60, 30), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 0.5, (55, 66, 200), 1)
-            cv2.circle(img, (x1, y1), 10, (55, 66, 200), cv2.FILLED)
-            cv2.putText(img, f'x2={x2}, y2={y2}', (60, 60), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 0.5, (177, 235, 220), 1)
-            cv2.circle(img, (x2, y2), 10, (177, 235, 220), cv2.FILLED)
-            cv2.line(img, (x1, y1), (x2, y2), (255, 0, 255), 3)
+            cv2.putText(img, f'x1={x1}, y1={y1}', (60, 30), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 0.5, colors.COLOR_POINT_A, 1)
+            cv2.circle(img, (x1, y1), 10, colors.COLOR_POINT_A, cv2.FILLED)
+            cv2.putText(img, f'x2={x2}, y2={y2}', (60, 60), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 0.5, colors.COLOR_POINT_B, 1)
+            cv2.circle(img, (x2, y2), 10, colors.COLOR_POINT_B, cv2.FILLED)
+            cv2.line(img, (x1, y1), (x2, y2), colors.COLOR_LINE, 3)
 
             if length < 50:
-                cv2.circle(img, (midX, midY), 10, (255, 0, 255), cv2.FILLED)
+                cv2.circle(img, (midX, midY), 10, colors.COLOR_LINE, cv2.FILLED)
 
             # print(length)
 
@@ -54,14 +55,14 @@ def main():
             print(f'length({length}), newVolume({newVolume})')
             volume.SetMasterVolumeLevel(newVolume, None)
 
-        cv2.rectangle(img, (50, 150), (85, 400), (255, 0, 0), 3)
-        cv2.rectangle(img, (50, int(volumeBar)), (85, 400), (255, 0, 0), cv2.FILLED)
+        cv2.rectangle(img, (50, 150), (85, 400), colors.COLOR_BLUE, 3)
+        cv2.rectangle(img, (50, int(volumeBar)), (85, 400), colors.COLOR_BLUE, cv2.FILLED)
 
         currentTime = time.time()
         fps = 1 / (currentTime - prevTime)
         prevTime = currentTime
 
-        cv2.putText(img, str(int(fps)), (5, 30), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.putText(img, str(int(fps)), (5, 30), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 1, colors.COLOR_GREEN, 2)
 
         cv2.imshow("Image", img)
         cv2.waitKey(1)

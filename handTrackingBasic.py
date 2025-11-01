@@ -1,6 +1,7 @@
 import cv2
 import mediapipe
 import time
+import overlay_colors as colors
 
 capture = cv2.VideoCapture(0)
 
@@ -23,7 +24,7 @@ while True:
                 imgHeight, imgWidth, imgChannels = img.shape
                 imgX, imgY = int(landmark.x * imgWidth), int(landmark.y * imgHeight)
                 if index == 8:
-                    cv2.circle(img, (imgX, imgY), 25, (0, 0, 200), cv2.FILLED)
+                    cv2.circle(img, (imgX, imgY), 25, colors.COLOR_FINGERTIP, cv2.FILLED)
 
             mpDraw.draw_landmarks(img, handLandmarks, mpHands.HAND_CONNECTIONS)
 
@@ -31,7 +32,7 @@ while True:
     fps = 1 / (currentTime - prevTime)
     prevTime = currentTime
 
-    cv2.putText(img, str(int(fps)), (5, 30), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 1, (0, 255, 0), 2)
+    cv2.putText(img, str(int(fps)), (5, 30), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 1, colors.COLOR_GREEN, 2)
 
     cv2.imshow("Image", img)
     cv2.waitKey(1)

@@ -1,6 +1,7 @@
 import cv2
 import mediapipe
 import time
+import overlay_colors as colors
 
 camWidth, camHeight = 1280, 720
 capture = cv2.VideoCapture(0)
@@ -27,15 +28,15 @@ while True:
                 imgHeight, imgWidth, imgChannels = img.shape
                 imgX, imgY = int(landmark.x * imgWidth), int(landmark.y * imgHeight)
                 # if index == 8:
-                #     cv2.circle(img, (imgX, imgY), 25, (0, 0, 200), cv2.FILLED)
+                #     cv2.circle(img, (imgX, imgY), 25, colors.COLOR_FINGERTIP, cv2.FILLED)
                 if index == 0:
                     landmark_formatted = "({:.5e}, {:.5e}, {:.5e})".format(landmark.x, landmark.y, landmark.z)
                     if hand == 0:
-                        color = (177, 235, 220)
+                        color = colors.COLOR_POINT_B
                         cv2.circle(img, (imgX, imgY), 10, color, cv2.FILLED)
                         cv2.putText(img, landmark_formatted, (60, 30), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 0.5, color, 1)
                     elif hand == 1:
-                        color = (55, 66, 200)
+                        color = colors.COLOR_POINT_A
                         cv2.circle(img, (imgX, imgY), 10, color, cv2.FILLED)
                         cv2.putText(img, landmark_formatted, (60, 60), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 0.5, color, 1)
 
@@ -46,7 +47,7 @@ while True:
     fps = 1 / (currentTime - prevTime)
     prevTime = currentTime
 
-    cv2.putText(img, str(int(fps)), (5, 30), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 1, (0, 255, 0), 2)
+    cv2.putText(img, str(int(fps)), (5, 30), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 1, colors.COLOR_GREEN, 2)
 
     cv2.imshow("Image", img)
     cv2.waitKey(1)

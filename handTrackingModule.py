@@ -1,6 +1,7 @@
 import math
 
 import cv2
+import overlay_colors as colors
 import warnings
 # Suppress noisy protobuf deprecation warnings emitted by some mediapipe/tflite
 # components during runtime (repeated messages like "SymbolDatabase.GetPrototype() is deprecated").
@@ -54,7 +55,7 @@ class HandDetector():
                     yPalmList.append(imgY)
 
                 if draw:
-                    cv2.circle(img, (imgX, imgY), 5, (200, 0, 0), cv2.FILLED)
+                    cv2.circle(img, (imgX, imgY), 5, colors.COLOR_LANDMARK_SMALL_BLUE, cv2.FILLED)
 
             handBoundingBox = min(xHandList), min(yHandList), max(xHandList), max(yHandList)
             palmBoundingBox = min(xPalmList), min(yPalmList), max(xPalmList), max(yPalmList)
@@ -62,10 +63,10 @@ class HandDetector():
         if draw:
             if handBoundingBox:
                 cv2.rectangle(img, (handBoundingBox[0], handBoundingBox[1]), (handBoundingBox[2], handBoundingBox[3]),
-                              (255, 50, 0), 2)
+                              colors.COLOR_BBOX_HAND, 2)
             if palmBoundingBox:
                 cv2.rectangle(img, (palmBoundingBox[0], palmBoundingBox[1]), (palmBoundingBox[2], palmBoundingBox[3]),
-                             (150, 50, 0), 2)
+                             colors.COLOR_BBOX_PALM, 2)
 
         return self.landmarkList, handBoundingBox, palmBoundingBox
 
@@ -93,12 +94,12 @@ class HandDetector():
         length = math.hypot(x2 - x1, y2 - y1)
 
         if draw:
-            # cv2.putText(img, f'x1={x1}, y1={y1}', (60, 30), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 1, (55, 66, 200), 1)
-            cv2.circle(img, (x1, y1), 10, (55, 66, 200), cv2.FILLED)
-            # cv2.putText(img, f'x2={x2}, y2={y2}', (60, 60), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 1, (177, 235, 220), 1)
-            cv2.circle(img, (x2, y2), 10, (177, 235, 220), cv2.FILLED)
-            cv2.line(img, (x1, y1), (x2, y2), (255, 0, 255), 3)
-            cv2.circle(img, (midX, midY), 10, (255, 0, 255), cv2.FILLED)
+            # cv2.putText(img, f'x1={x1}, y1={y1}', (60, 30), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 1, colors.COLOR_POINT_A, 1)
+            cv2.circle(img, (x1, y1), 10, colors.COLOR_POINT_A, cv2.FILLED)
+            # cv2.putText(img, f'x2={x2}, y2={y2}', (60, 60), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 1, colors.COLOR_POINT_B, 1)
+            cv2.circle(img, (x2, y2), 10, colors.COLOR_POINT_B, cv2.FILLED)
+            cv2.line(img, (x1, y1), (x2, y2), colors.COLOR_LINE, 3)
+            cv2.circle(img, (midX, midY), 10, colors.COLOR_LINE, cv2.FILLED)
 
         return length, [x1, y1, x2, y2, midX, midY]
 def main():
@@ -119,7 +120,7 @@ def main():
         fps = 1 / (currentTime - prevTime)
         prevTime = currentTime
 
-        cv2.putText(img, str(int(fps)), (5, 30), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.putText(img, str(int(fps)), (5, 30), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 1, colors.COLOR_GREEN, 2)
 
         cv2.imshow("Image", img)
         cv2.waitKey(1)
