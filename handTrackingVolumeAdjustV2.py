@@ -85,7 +85,21 @@ def process_frame(img, draw=True):
         raise KeyboardInterrupt # Exits
 
 if __name__ == "__main__":
-    frameClient.main(callbackFunc=process_frame, showOriginalFrame=False)
+    # Keep the behavior when executed as a script, but expose a callable main()
+    def main(showOriginalFrame=False):
+        """Run the V2 volume adjuster.
+
+        Args:
+            showOriginalFrame (bool): If True, the original shared frame window will be shown
+                                     alongside the processed view. Defaults to False.
+        """
+        try:
+            frameClient.main(callbackFunc=process_frame, showOriginalFrame=showOriginalFrame)
+        except KeyboardInterrupt:
+            print("Exited by user")
+
+    # Execute when run as a script
+    main(showOriginalFrame=False)
 
     ### Uncomment this to use local video capture (comment out the frameClient line)
     # while True:

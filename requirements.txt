@@ -1,0 +1,8 @@
+opencv-python
+# mediapipe might require older python version (like 3.10)
+mediapipe
+numpy
+# pycaw + comtypes are Windows-only audio control packages. Keep them if you
+# intend to run on Windows; otherwise install platform-specific audio libs.
+pycaw
+comtypes
