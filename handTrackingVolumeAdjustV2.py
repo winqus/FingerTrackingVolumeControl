@@ -1,18 +1,15 @@
+import logging
 import frameClient
+# Use a module logger instead of importing from venv (that module doesn't export a logger)
+logger = logging.getLogger(__name__)
+# Configure basic logging so errors are visible when running as a script.
+logging.basicConfig(level=logging.INFO)
 import cv2
 import time
 import handTrackingModule
 import numpy as np
 import math
-from comtypes import CLSCTX_ALL
-from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
-
-devices = AudioUtilities.GetSpeakers()
-interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
-volumeInterface = interface.QueryInterface(IAudioEndpointVolume)
-
-volumeRange = volumeInterface.GetVolumeRange()
-minVolume, maxVolume = volumeRange[0:2]
+import audio
 
 ### Uncomment to initialize video capture here
 # camWidth, camHeight = 1280, 720
@@ -31,7 +28,7 @@ def boundingBoxArea(boundingBox) :
     return (boundingBox[2] - boundingBox[0]) * (boundingBox[3] - boundingBox[1])
 
 def process_frame(img, draw=True):
-    global prevTime, volumeBar, handDetector, minVolume, maxVolume, volumeInterface
+    global prevTime, volumeBar, handDetector
     global lastFingerEventTime
 
     handDetector.detectHands(img)
@@ -61,7 +58,13 @@ def process_frame(img, draw=True):
             if fingerStateCorrect:
                 currentTime = time.time()
                 if (currentTime - lastFingerEventTime) > 0.2:
-                    volumeInterface.SetMasterVolumeLevelScalar(volumePercentage / 100, None)
+                    # set system volume (percent 0-100)
+                    try:
+                        audio.set_volume(volumePercentage)
+                    except Exception:
+                        # on failure, ignore so UI still runs
+                        logger.debug("Failed to set volume", exc_info=True)
+                        pass
                     lastFingerEventTime = currentTime
                 if draw:
                     cv2.circle(img, (midX, midY), 10, (0, 255, 0), cv2.FILLED)
@@ -70,7 +73,10 @@ def process_frame(img, draw=True):
     if draw:
         cv2.rectangle(img, (5, 150), (20, 400), (255, 0, 0), 3)
         cv2.rectangle(img, (5, int(volumeBar)), (20, 400), (255, 0, 0), cv2.FILLED)
-        currentVolume = int(volumeInterface.GetMasterVolumeLevelScalar() * 100)
+        try:
+            currentVolume = int(audio.get_volume())
+        except Exception:
+            currentVolume = 0
         cv2.putText(img, f'Volume({currentVolume}%)', (80, 30), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
 
     # Frame rate

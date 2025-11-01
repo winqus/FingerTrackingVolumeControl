@@ -1,6 +1,10 @@
 import math
 
 import cv2
+import warnings
+# Suppress noisy protobuf deprecation warnings emitted by some mediapipe/tflite
+# components during runtime (repeated messages like "SymbolDatabase.GetPrototype() is deprecated").
+warnings.filterwarnings("ignore", message=".*SymbolDatabase.GetPrototype.*")
 import mediapipe
 import time
 
