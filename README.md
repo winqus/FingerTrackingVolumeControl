@@ -1,11 +1,12 @@
 # Finger Tracking Volume Control
 
-Minimal collection of demos that control system volume using finger tracking (OpenCV + MediaPipe).
+Control system audio using finger tracking (OpenCV + MediaPipe).
+The extended pinky finger triggers audio adjustment mode, and the distance between the thumb and index finger controls the audio level.
 
 ![Demo image](docs/demo.png)
 
 ## Demo Video
-<video src="docs/demo.mp4" width="auto" height="auto" controls></video>
+<video src="https://github.com/user-attachments/assets/c6ccbca8-12fd-4430-87b6-9f8d203c4cb3" width="auto" height="auto" controls></video>
 
 ## Quick start
 
@@ -56,14 +57,3 @@ python handTrackingBasic.py
 - Frame sharing server/client: `cameraServer.py` (server) and `frameClient.py` (client).
 - `handTrackingVolumeAdjustV2.py` now exposes a `main(showOriginalFrame=False)` function so it can be imported and run by `main.py` without spawning a subprocess.
 - The project historically used `pycaw`/`comtypes` which are Windows-specific for audio control. On macOS you may need to replace the volume-control bits (e.g., use `osascript` or `pyobjc` approaches). See `handTrackingVolumeAdjustV2.py` for where audio is set.
-
-## License
-This repository includes a `LICENSE` file (MIT) — change or add a different license if needed.
-# Finger Tracking Volume Control
-
-Minimal repo to control system volume with finger tracking (OpenCV + MediaPipe).
-
-Notes
-- The module [`handTrackingModule.HandDetector`](handTrackingModule.py) contains the hand detection utilities.
-- The frame-sharing implementation is in [cameraServer.py](cameraServer.py) (server) and [`frameClient.main`](frameClient.py) (client).
-- [`handTrackingVolumeAdjustV2.process_frame`](handTrackingVolumeAdjustV2.py) is the callback used by the frame client-based demo.
